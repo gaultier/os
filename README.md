@@ -4,7 +4,7 @@
 ## Build
 
 ```sh
-$ make
+$ make run
 ```
 
 Disassemble:
