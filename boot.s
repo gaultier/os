@@ -2,7 +2,6 @@
 ;   - Functions preserve: bx, si, di, bp, sp
 ;   - Scratch registers: ax, cx, dx
 
-%define msg_a20_enabled_len 11
 
 [bits 16]	; Tells the assembler that its a 16 bit code
 [org 0x7C00]	; Origin, tell the assembler that where the code will
@@ -13,15 +12,26 @@ in al, 0x92
 or al, 2
 out 0x92, al
 
+
 mov bx, msg_a20_enabled
 mov si, msg_a20_enabled_len
 call puts
 
-mov bx, 12345
+; Detect low memory.
+clc
+int 0x12
+jc low_mem_err
+; ax contains the amount of low memory.
+mov bx, ax
 call put_u16
 
 jmp $ 		;Infinite loop, hang it here.
 
+
+low_mem_err:
+	mov bx, msg_low_mem_err
+	mov si, msg_low_mem_err_len
+	hlt
 
 ; IN: 
 ; - bx: c
@@ -96,7 +106,11 @@ put_u16:
 
 
 ; Data.
-msg_a20_enabled db "A20 enabled"
+msg_a20_enabled db "A20 enabled."
+msg_a20_enabled_len equ $ - msg_a20_enabled
+
+msg_low_mem_err db "Error detecting low memory."
+msg_low_mem_err_len equ $ - msg_low_mem_err
 
 scratch: db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
 
