@@ -21,16 +21,20 @@ mov ax, 0
 mov es, ax
 mov ebx, 0 ; Clear.
 
-%define START_KERNEL_MEM 0x7c00+512
+%define START_KERNEL_MEM 0x8000
 mov di, START_KERNEL_MEM
 
-mov edx, 0x534D4150 ; Magic number.
+mov edx, 0x534D4150 ; Magic number: SMAP.
 mov ecx, 24 ; sizeof(entry) (could be 20 if no ACPI3).
-mov ax, 0
-mov ebx, 0 ; Clear bx.
+xor ebx, ebx ; Clear bx.
 mov eax, 0xe820
 int 0x15
 jc upper_mem_err
+cmp eax, edx ; On success, eax must have been reset to "SMAP".
+jne upper_mem_err
+
+test ebx, ebx ; End of list (only one entry?)
+je upper_mem_err
 mov ebp, ebx; Preserve `ebx` for next call.
 
 	; Print real sizeof(entry): probably 20.
@@ -79,7 +83,7 @@ mov eax, 0xe820
 mov ebx, ebp ; Restore bx.
 int 0x15
 jc upper_mem_err
-mov ebp, ebx; Preserve `bx` for next call.
+mov ebp, ebx; Preserve `ebx` for next call.
 
 print_upper_mem_entry_u64
 
