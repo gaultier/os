@@ -6,9 +6,12 @@
 [org 0x7C00]	; Origin, tell the assembler that where the code will
 	; be in memory after it is been loaded
 
-mov bx, hello_world
-mov si, [hello_world_len]
-call puts
+;mov bx, hello_world
+;mov si, [hello_world_len]
+;call puts
+
+mov bx, 98
+call put_u16
 
 jmp $ 		;Infinite loop, hang it here.
 
@@ -50,11 +53,41 @@ puts:
 
 ; IN:
 ; - bx: n
-; OUT:
-; - si: buf
-; INOUT:
-; - di: buf_len
 put_u16:
+	push bp
+	mov bp, sp
+
+	sub sp, 16
+	
+	mov ax, bx
+	; bp ---- bx --- bp-16
+	; bx = bp - len 
+	; len = bp - bx
+	mov bx, [bp - 16]  ; buf
+
+	.loop
+		cmp ax, 0 ; `while (n!=0) {...}`
+		jz .end
+
+		xor dx, dx ; Reset dx (remainder).
+		mov cx, 10 ; Divisor.
+		div cx; / n/=10, dx = remainder.
+
+		add dx, '0' ; Convert to ASCII code.
+		
+		dec bx
+		mov [bx], dx
+
+		jmp .loop
+
+.end:
+	mov si, bp
+	add si, bx
+	call puts
+
+	add sp, 16
+	pop bp
+	ret
 
 
 ; Data.
