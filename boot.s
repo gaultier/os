@@ -1,8 +1,6 @@
 ; Calling convention: 
 ;   - Functions preserve: bx, si, di, bp, sp
 ;   - Scratch registers: ax, cx, dx
-
-
 [bits 16]	; Tells the assembler that its a 16 bit code
 [org 0x7C00]	; Origin, tell the assembler that where the code will
 	; be in memory after it is been loaded
@@ -12,90 +10,81 @@ in al, 0x92
 or al, 2
 out 0x92, al
 
-
 mov bx, msg_a20_enabled
 mov si, msg_a20_enabled_len
-call puts
+call print_s
 
-; Detect low memory.
-clc
-int 0x12
-jc low_mem_err
-; ax contains the amount of low memory.
-mov bx, ax
-call put_u16
-
-mov bx, '.'
-call putc
 
 ; Detect upper memory.
 clc
 mov ax, 0
 mov es, ax
 mov ebx, 0 ; Clear.
-mov edx, 0x534D4150 ; Magic number.
-mov ecx, 24 ; Magic number.
+
 %define START_KERNEL_MEM 0x7c00+512
 mov di, START_KERNEL_MEM
+
+mov edx, 0x534D4150 ; Magic number.
+mov ecx, 24 ; sizeof(entry) (could be 20 if no ACPI3).
+mov ax, 0
+mov ebx, 0 ; Clear bx.
 mov eax, 0xe820
 int 0x15
 jc upper_mem_err
+mov ebp, ebx; Preserve `ebx` for next call.
 
-mov bp, bx; Preserve `bx` for next call.
+	; Print real sizeof(entry): probably 20.
+mov bl, cl
+call print_num
+mov bx, ' '
+call print_c
 
-mov bx, [es:di]
-call put_u16
-mov bx, '-'
-call putc
 
-add di, 16
-mov bx, [es:di]
-call put_u16
-mov bx, '-'
-call putc
+%macro print_upper_mem_entry_u64 0
+	%rep 4
+		mov bx, [es:di]
+		call print_num
+		mov bx, '-'
+		call print_c
+		
+		add di, 2
+	%endrep
 
-add di, 16
-mov bx, [es:di]
-call put_u16
-mov bx, '-'
-call putc
+	mov bx, ' '
+	call print_c
+%endmacro
 
-add di, 16
-mov bx, [es:di]
-call put_u16
+%macro print_upper_mem_entry_u32 0
+	%rep 2
+		mov bx, [es:di]
+		call print_num
+		mov bx, '-'
+		call print_c
+		
+		add di, 2
+	%endrep
 
-mov bx, '_'
-call putc
+	mov bx, ' '
+	call print_c
+%endmacro
 
-add di, 16
-mov bx, [es:di]
-call put_u16
-mov bx, '-'
-call putc
+print_upper_mem_entry_u64
+print_upper_mem_entry_u64
+print_upper_mem_entry_u32
 
-add di, 16
-mov bx, [es:di]
-call put_u16
-mov bx, '-'
-call putc
 
-add di, 16
-mov bx, [es:di]
-call put_u16
-mov bx, '-'
-call putc
+; Next entry for upper memory.
+mov ecx, 24 ; sizeof(entry) (could be 20 if no ACPI3).
+mov eax, 0xe820
+mov bx, bp ; Restore bx.
+int 0x15
+jc upper_mem_err
+mov ebp, ebx; Preserve `bx` for next call.
 
-add di, 16
-mov bx, [es:di]
-call put_u16
+print_upper_mem_entry_u64
 
 jmp $ 		;Infinite loop, hang it here.
 
-
-low_mem_err:
-	mov bx, msg_low_mem_err
-	mov si, msg_low_mem_err_len
-	hlt
 
 upper_mem_err:
 	mov bx, msg_upper_mem_err
@@ -104,7 +93,7 @@ upper_mem_err:
 
 ; IN: 
 ; - bx: c
-putc:	; Procedure to print character on screen
+print_c:	; Procedure to print character on screen
 	mov al, bl; Save.
 
 	mov ah, 0x0E	; Tell BIOS that we need to print one charater on screen.
@@ -119,7 +108,7 @@ putc:	; Procedure to print character on screen
 ; IN:
 ; - bx: s
 ; - si: len(s)
-puts:
+print_s:
 	.loop:
 		cmp si, 0
 		jz .end
@@ -128,7 +117,7 @@ puts:
 		; > Valid 16-bit addresses consist of an optional offset, an optional base register (bx or bp), and an optional index register (si or di). That's it! "[sp]" is not on that list.
 		mov dx, bx
 		mov bx, [bx]
-		call putc
+		call print_c
 	  mov bx, dx
 		inc bx
 	  dec si
@@ -140,7 +129,7 @@ puts:
 
 ; IN:
 ; - bx: n
-put_u16:
+print_num:
 	mov ax, bx
 	; bp ---- bx --- bp-16
 	; bx = bp - len 
@@ -169,7 +158,7 @@ put_u16:
 	add si, 16
 	sub si, bx
 
-	call puts
+	call print_s
 
 	ret
 
@@ -178,8 +167,6 @@ put_u16:
 msg_a20_enabled db "A20 enabled."
 msg_a20_enabled_len equ $ - msg_a20_enabled
 
-msg_low_mem_err db "Error detecting low memory."
-msg_low_mem_err_len equ $ - msg_low_mem_err
 
 msg_upper_mem_err db "Error detecting upper memory."
 msg_upper_mem_err_len equ $ - msg_upper_mem_err
