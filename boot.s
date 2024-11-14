@@ -2,9 +2,17 @@
 ;   - Functions preserve: bx, si, di, bp, sp
 ;   - Scratch registers: ax, cx, dx
 
+
 [bits 16]	; Tells the assembler that its a 16 bit code
 [org 0x7C00]	; Origin, tell the assembler that where the code will
 	; be in memory after it is been loaded
+
+mov ax, 0
+mov ds, ax
+mov es, ax
+mov ss, ax
+mov sp, 0x7c00
+;mv bp, sp
 
 ;mov bx, hello_world
 ;mov si, [hello_world_len]
@@ -54,18 +62,14 @@ puts:
 ; IN:
 ; - bx: n
 put_u16:
-	push bp
-	mov bp, sp
-
-	sub sp, 16
-	
 	mov ax, bx
 	; bp ---- bx --- bp-16
 	; bx = bp - len 
 	; len = bp - bx
-	mov bx, [bp - 16]  ; buf
+	mov bx, scratch ; buf
+	add bx, 16
 
-	.loop
+	.loop:
 		cmp ax, 0 ; `while (n!=0) {...}`
 		jz .end
 
@@ -76,23 +80,26 @@ put_u16:
 		add dx, '0' ; Convert to ASCII code.
 		
 		dec bx
-		mov [bx], dx
+		mov [bx], dl
 
 		jmp .loop
 
 .end:
-	mov si, bp
-	add si, bx
+	; len
+	mov si, scratch
+	add si, 16
+	sub si, bx
+
 	call puts
 
-	add sp, 16
-	pop bp
 	ret
 
 
 ; Data.
 hello_world db "hello, world!"
 hello_world_len dw 13
+
+scratch: db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
 
 times 510 - ($ - $$) db 0	; Fill the rest of sector with 0
 dw 0xAA55			; Add boot signature at the end of bootloader
