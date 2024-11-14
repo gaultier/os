@@ -76,7 +76,7 @@ print_upper_mem_entry_u32
 ; Next entry for upper memory.
 mov ecx, 24 ; sizeof(entry) (could be 20 if no ACPI3).
 mov eax, 0xe820
-mov bx, bp ; Restore bx.
+mov ebx, ebp ; Restore bx.
 int 0x15
 jc upper_mem_err
 mov ebp, ebx; Preserve `bx` for next call.
