@@ -25,12 +25,79 @@ jc low_mem_err
 mov bx, ax
 call put_u16
 
+mov bx, '.'
+call putc
+
+; Detect upper memory.
+clc
+mov ax, 0
+mov es, ax
+mov ebx, 0 ; Clear.
+mov edx, 0x534D4150 ; Magic number.
+mov ecx, 24 ; Magic number.
+%define START_KERNEL_MEM 0x7c00+512
+mov di, START_KERNEL_MEM
+mov eax, 0xe820
+int 0x15
+jc upper_mem_err
+
+mov bx, [es:di]
+call put_u16
+mov bx, '-'
+call putc
+
+add di, 16
+mov bx, [es:di]
+call put_u16
+mov bx, '-'
+call putc
+
+add di, 16
+mov bx, [es:di]
+call put_u16
+mov bx, '-'
+call putc
+
+add di, 16
+mov bx, [es:di]
+call put_u16
+
+mov bx, '_'
+call putc
+
+add di, 16
+mov bx, [es:di]
+call put_u16
+mov bx, '-'
+call putc
+
+add di, 16
+mov bx, [es:di]
+call put_u16
+mov bx, '-'
+call putc
+
+add di, 16
+mov bx, [es:di]
+call put_u16
+mov bx, '-'
+call putc
+
+add di, 16
+mov bx, [es:di]
+call put_u16
+
 jmp $ 		;Infinite loop, hang it here.
 
 
 low_mem_err:
 	mov bx, msg_low_mem_err
 	mov si, msg_low_mem_err_len
+	hlt
+
+upper_mem_err:
+	mov bx, msg_upper_mem_err
+	mov si, msg_upper_mem_err_len
 	hlt
 
 ; IN: 
@@ -111,6 +178,9 @@ msg_a20_enabled_len equ $ - msg_a20_enabled
 
 msg_low_mem_err db "Error detecting low memory."
 msg_low_mem_err_len equ $ - msg_low_mem_err
+
+msg_upper_mem_err db "Error detecting upper memory."
+msg_upper_mem_err_len equ $ - msg_upper_mem_err
 
 scratch: db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
 
