@@ -28,32 +28,34 @@ putc:	; Procedure to print character on screen
 	ret
 
 ; IN:
-; - bx:s
+; - bx: s
 ; - si: len(s)
 puts:
-	; Save.
-	mov ax, bx
-	mov cx, si
-	mov dx, bx ; Incrementing pointer.
-
 	.loop:
 		or si, si
 		jz .end
 
 		; > Valid 16-bit addresses consist of an optional offset, an optional base register (bx or bp), and an optional index register (si or di). That's it! "[sp]" is not on that list.
-		mov bx, dx
+		mov dx, bx
 		mov bx, [bx]
 		call putc
-		inc dx
+	  mov bx, dx
+		inc bx
 	  dec si
 
 	jmp .loop
 
-
 .end:
-	mov bx, ax
-	mov si, cx
 	ret
+
+; IN:
+; - bx: n
+; OUT:
+; - si: buf
+; INOUT:
+; - di: buf_len
+put_u16:
+
 
 ; Data.
 hello_world db "hello, world!"
