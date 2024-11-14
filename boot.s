@@ -41,6 +41,8 @@ mov eax, 0xe820
 int 0x15
 jc upper_mem_err
 
+mov bp, bx; Preserve `bx` for next call.
+
 mov bx, [es:di]
 call put_u16
 mov bx, '-'
