@@ -16,7 +16,7 @@
 	%rep 4
 		mov bx, [es:di]
 		call print_num
-		mov bx, '|'
+		mov bx, '_'
 		call print_c
 		
 		add di, 2
@@ -30,7 +30,7 @@
 	%rep 2
 		mov bx, [es:di]
 		call print_num
-		mov bx, '|'
+		mov bx, '_'
 		call print_c
 		
 		add di, 2
@@ -139,9 +139,6 @@ print_num:
 	add bx, 16
 
 	.loop:
-		cmp ax, 0 ; `while (n!=0) {...}`
-		jz .end
-
 		xor dx, dx ; Reset dx (remainder).
 		mov cx, 10 ; Divisor.
 		div cx; / n/=10, dx = remainder.
@@ -151,7 +148,8 @@ print_num:
 		dec bx
 		mov [bx], dl
 
-		jmp .loop
+		cmp ax, 0 ; `do {...} while (n!=0)`
+		jz .end
 
 .end:
 	; len
