@@ -5,51 +5,18 @@
 [org 0x7C00]	; Origin, tell the assembler that where the code will
 	; be in memory after it is been loaded
 
-; Enable A20 gate.
-in al, 0x92
-or al, 2
-out 0x92, al
-
-mov bx, msg_a20_enabled
-mov si, msg_a20_enabled_len
-call print_s
-
-
-; Detect upper memory.
-clc
-mov ax, 0
-mov es, ax
-mov ebx, 0 ; Clear.
-
-%define START_KERNEL_MEM 0x8000
-mov di, START_KERNEL_MEM
-
-xor ebx, ebx ; Clear bx.
-get_upper_mem:
-mov edx, 0x534D4150 ; Magic number: SMAP.
-mov ecx, 24 ; sizeof(entry) (could be 20 if no ACPI3).
-mov eax, 0xe820
-int 0x15
-jc upper_mem_err
-cmp eax, edx ; On success, eax must have been reset to "SMAP".
-jne upper_mem_err
-
-test ebx, ebx ; End of list (only one entry?)
-je end
-mov ebp, ebx; Preserve `ebx` for next call.
-
-; Print real sizeof(entry): probably 20.
-mov bl, cl
-call print_num
-mov bx, ' '
-call print_c
-
+%macro print_newline 0
+	mov bx, 0x0d
+	call print_c
+	mov bx, 0x0a
+	call print_c
+%endmacro
 
 %macro print_upper_mem_entry_u64 0
 	%rep 4
 		mov bx, [es:di]
 		call print_num
-		mov bx, '-'
+		mov bx, '|'
 		call print_c
 		
 		add di, 2
@@ -63,7 +30,7 @@ call print_c
 	%rep 2
 		mov bx, [es:di]
 		call print_num
-		mov bx, '-'
+		mov bx, '|'
 		call print_c
 		
 		add di, 2
@@ -73,20 +40,52 @@ call print_c
 	call print_c
 %endmacro
 
-print_upper_mem_entry_u64
-print_upper_mem_entry_u64
-print_upper_mem_entry_u32
+%define START_KERNEL_MEM 0x8000
 
-mov bx, '|'
-call print_c
+start:
+	; Detect upper memory.
+	clc
+	mov ax, 0
+	mov es, ax
+	mov ebx, 0 ; Clear.
 
-; Next entry for upper memory.
-mov ebx, ebp ; Restore bx.
-jmp get_upper_mem
+	mov di, START_KERNEL_MEM
+
+	xor ebx, ebx ; Clear bx.
+
+get_upper_mem:
+	mov edx, 0x534D4150 ; Magic number: SMAP.
+	mov ecx, 24 ; sizeof(entry) (could be 20 if no ACPI3).
+	mov eax, 0xe820
+	int 0x15
+	jc upper_mem_err
+	cmp eax, edx ; On success, eax must have been reset to "SMAP".
+	jne upper_mem_err
+
+	test ebx, ebx ; End of list (only one entry?)
+	je end
+	mov ebp, ebx; Preserve `ebx` for next call.
+
+	; Print real sizeof(entry): probably 20.
+	mov bl, cl
+	call print_num
+	mov bx, ' '
+	call print_c
+
+	print_upper_mem_entry_u64
+	print_upper_mem_entry_u64
+	print_upper_mem_entry_u32
+	print_newline
+
+	; Next entry for upper memory.
+	mov ebx, ebp ; Restore bx.
+	jmp get_upper_mem ; Loop.
 
 end:
-jmp $ 		;Infinite loop, hang it here.
+	hlt
 
+
+; Utilities.
 
 upper_mem_err:
 	mov bx, msg_upper_mem_err
@@ -166,10 +165,6 @@ print_num:
 
 
 ; Data.
-msg_a20_enabled db "A20 enabled."
-msg_a20_enabled_len equ $ - msg_a20_enabled
-
-
 msg_upper_mem_err db "Error detecting upper memory."
 msg_upper_mem_err_len equ $ - msg_upper_mem_err
 
