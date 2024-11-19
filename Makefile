@@ -8,3 +8,6 @@ run: boot.bin
 
 .PHONY: run
 
+
+# gdb-remote 1234
+# br s -a 0x7c00+0x26

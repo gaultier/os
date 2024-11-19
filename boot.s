@@ -72,9 +72,9 @@ get_upper_mem:
 	mov bx, ' '
 	call print_c
 
-	print_upper_mem_entry_u64
-	print_upper_mem_entry_u64
-	print_upper_mem_entry_u32
+	print_upper_mem_entry_u64 ; Address.
+	print_upper_mem_entry_u64 ; Length.
+	print_upper_mem_entry_u32 ; Type.
 	print_newline
 
 	; Next entry for upper memory.
@@ -149,7 +149,7 @@ print_num:
 		mov [bx], dl
 
 		cmp ax, 0 ; `do {...} while (n!=0)`
-		jz .end
+		jne .loop
 
 .end:
 	; len
