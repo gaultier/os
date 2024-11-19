@@ -40,16 +40,22 @@
 	call print_c
 %endmacro
 
-%define START_KERNEL_MEM 0x8000
+%define FREE_SPACE 0x8000
+
 
 start:
 	; Detect upper memory.
 	clc
 	mov ax, 0
+	mov sp, start
+	mov ss, ax
+	mov ds, ax
 	mov es, ax
-	mov ebx, 0 ; Clear.
+	mov fs, ax
+	mov gs, ax
+	cld ; TODO
 
-	mov di, START_KERNEL_MEM
+	mov di, FREE_SPACE
 
 	xor ebx, ebx ; Clear bx.
 
@@ -63,7 +69,7 @@ get_upper_mem:
 	jne upper_mem_err
 
 	test ebx, ebx ; End of list (only one entry?)
-	je end
+	je .end
 	mov ebp, ebx; Preserve `ebx` for next call.
 
 	; Print real sizeof(entry): probably 20.
@@ -81,9 +87,12 @@ get_upper_mem:
 	mov ebx, ebp ; Restore bx.
 	jmp get_upper_mem ; Loop.
 
-end:
-	hlt
+.end:
+	jmp switch_to_long_mode
 
+
+%include "long_mode_directly.s"
+BITS 16
 
 ; Utilities.
 
@@ -168,5 +177,6 @@ msg_upper_mem_err_len equ $ - msg_upper_mem_err
 
 scratch: db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
 
-times 510 - ($ - $$) db 0	; Fill the rest of sector with 0
-dw 0xAA55			; Add boot signature at the end of bootloader
+; Pad out file.
+times 510 - ($-$$) db 0
+dw 0xAA55
