@@ -40,7 +40,7 @@
 	call print_c
 %endmacro
 
-%define FREE_SPACE 0x8000
+%define FREE_SPACE 0x9000
 
 
 start:
@@ -73,33 +73,34 @@ get_upper_mem:
 	mov ebp, ebx; Preserve `ebx` for next call.
 
 	; Print real sizeof(entry): probably 20.
-	mov bl, cl
-	call print_num
-	mov bx, ' '
-	call print_c
+	;mov bl, cl
+	;call print_num
+	;mov bx, ' '
+	;call print_c
 
-	print_upper_mem_entry_u64 ; Address.
-	print_upper_mem_entry_u64 ; Length.
-	print_upper_mem_entry_u32 ; Type.
-	print_newline
+	;print_upper_mem_entry_u64 ; Address.
+	;print_upper_mem_entry_u64 ; Length.
+	;print_upper_mem_entry_u32 ; Type.
+	;print_newline
 
 	; Next entry for upper memory.
 	mov ebx, ebp ; Restore bx.
 	jmp get_upper_mem ; Loop.
+
 
 .end:
 	jmp switch_to_long_mode
 
 
 %include "long_mode_directly.s"
-BITS 16
+bits 16
+
 
 ; Utilities.
 
 upper_mem_err:
-	mov bx, msg_upper_mem_err
-	mov si, msg_upper_mem_err_len
 	hlt
+	jmp upper_mem_err
 
 ; IN: 
 ; - bx: c
@@ -170,10 +171,6 @@ print_num:
 
 	ret
 
-
-; Data.
-msg_upper_mem_err db "Error detecting upper memory."
-msg_upper_mem_err_len equ $ - msg_upper_mem_err
 
 scratch: db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
 
