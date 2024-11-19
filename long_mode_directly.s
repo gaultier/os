@@ -112,19 +112,4 @@ LongMode:
     mov rax, 0x1F201F201F201F20       ; Set the value to set the screen to: Blue background, white foreground, blank spaces.
     rep stosq                         ; Clear the entire screen. 
  
-mov	byte  [0xb8000], 0x68
-mov	byte  [0xb8001], 0x1f
-mov	byte  [0xb8002], 0x65
-mov	byte  [0xb8003], 0x1f
-mov	byte  [0xb8004], 0x6c
-mov	byte  [0xb8005], 0x1f
-mov	byte  [0xb8006], 0x6c
-mov	byte  [0xb8007], 0x1f
-mov	byte  [0xb8008], 0x6f
-mov	byte  [0xb8009], 0x1f
-mov	byte  [0xb800a], 0x20
-mov	byte  [0xb800b], 0x1f
-
-.loop:
-    hlt
-		jmp .loop
+    jmp kernel

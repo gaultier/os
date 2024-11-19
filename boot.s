@@ -104,76 +104,79 @@ upper_mem_err:
 
 ; IN: 
 ; - bx: c
-print_c:	; Procedure to print character on screen
-	mov al, bl; Save.
-
-	mov ah, 0x0E	; Tell BIOS that we need to print one charater on screen.
-	mov bh, 0x00	; Page no.
-	mov bl, 0x07	; Text attribute 0x07 is lightgrey font on black background
-
-	int 0x10	; Call video interrupt
-
-	mov bl, al ; Restore.
-	ret
-
-; IN:
-; - bx: s
-; - si: len(s)
-print_s:
-	.loop:
-		cmp si, 0
-		jz .end
-	  
-
-		; > Valid 16-bit addresses consist of an optional offset, an optional base register (bx or bp), and an optional index register (si or di). That's it! "[sp]" is not on that list.
-		mov dx, bx
-		mov bx, [bx]
-		call print_c
-	  mov bx, dx
-		inc bx
-	  dec si
-
-	jmp .loop
-
-.end:
-	ret
-
-; IN:
-; - bx: n
-print_num:
-	mov ax, bx
-	; bp ---- bx --- bp-16
-	; bx = bp - len 
-	; len = bp - bx
-	mov bx, scratch ; buf
-	add bx, 16
-
-	.loop:
-		xor dx, dx ; Reset dx (remainder).
-		mov cx, 10 ; Divisor.
-		div cx; / n/=10, dx = remainder.
-
-		add dx, '0' ; Convert to ASCII code.
-		
-		dec bx
-		mov [bx], dl
-
-		cmp ax, 0 ; `do {...} while (n!=0)`
-		jne .loop
-
-.end:
-	; len
-	mov si, scratch
-	add si, 16
-	sub si, bx
-
-	call print_s
-
-	ret
-
-
-scratch: db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+;print_c:	; Procedure to print character on screen
+;	mov al, bl; Save.
+;
+;	mov ah, 0x0E	; Tell BIOS that we need to print one charater on screen.
+;	mov bh, 0x00	; Page no.
+;	mov bl, 0x07	; Text attribute 0x07 is lightgrey font on black background
+;
+;	int 0x10	; Call video interrupt
+;
+;	mov bl, al ; Restore.
+;	ret
+;
+;; IN:
+;; - bx: s
+;; - si: len(s)
+;print_s:
+;	.loop:
+;		cmp si, 0
+;		jz .end
+;	  
+;
+;		; > Valid 16-bit addresses consist of an optional offset, an optional base register (bx or bp), and an optional index register (si or di). That's it! "[sp]" is not on that list.
+;		mov dx, bx
+;		mov bx, [bx]
+;		call print_c
+;	  mov bx, dx
+;		inc bx
+;	  dec si
+;
+;	jmp .loop
+;
+;.end:
+;	ret
+;
+;; IN:
+;; - bx: n
+;print_num:
+;	mov ax, bx
+;	; bp ---- bx --- bp-16
+;	; bx = bp - len 
+;	; len = bp - bx
+;	mov bx, scratch ; buf
+;	add bx, 16
+;
+;	.loop:
+;		xor dx, dx ; Reset dx (remainder).
+;		mov cx, 10 ; Divisor.
+;		div cx; / n/=10, dx = remainder.
+;
+;		add dx, '0' ; Convert to ASCII code.
+;		
+;		dec bx
+;		mov [bx], dl
+;
+;		cmp ax, 0 ; `do {...} while (n!=0)`
+;		jne .loop
+;
+;.end:
+;	; len
+;	mov si, scratch
+;	add si, 16
+;	sub si, bx
+;
+;	call print_s
+;
+;	ret
+;
+;
+;scratch: db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
 
 ; Pad out file.
 times 510 - ($-$$) db 0
 dw 0xAA55
+
+kernel:
+incbin "kernel.bin"
