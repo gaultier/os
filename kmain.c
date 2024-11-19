@@ -7,4 +7,11 @@ void print_s(uint8_t *s, uint64_t len) {
     *(ptr++) = 0x1f;
   }
 }
-void kmain() { print_s((uint8_t *)"hello me", 8); }
+void kmain() {
+  print_s((uint8_t *)"hello me", 8);
+
+  // Prevent return.
+  __asm__(".loop:\n"
+          "hlt\n"
+          "jmp .loop\n");
+}
