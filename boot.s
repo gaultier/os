@@ -7,7 +7,7 @@ org 0x7C00	; Origin, tell the assembler that where the code will
 start:
   ; Copy kernel.bin right after the boot sector.
 	mov ah, 2h    ; int13h function 2
-	mov al, 1    ; we want to read 2 sectors (sector size = 512).
+	mov al, 16    ; we want to read N sectors (sector size = 512).
 	mov ch, 0     ; from cylinder number 0
 	mov cl, 2     ; the sector number 2 - second sector (starts from 1, not 0)
 	mov dh, 0     ; head number 0
@@ -122,7 +122,8 @@ LongMode:
     mov es, ax
     mov fs, ax
     mov gs, ax
-    mov rsp, 0x90000
+    mov rsp, 0x7c00+8096
+	  mov rbp, rsp
 
     ; Blank out the screen to a blue color.
     mov edi, 0xB8000
@@ -139,3 +140,6 @@ dw 0xAA55
 
 kernel:
 incbin "kernel.bin"
+; Pad out file.
+stack: times 4096 db 0
+times 8192 - ($-$$) db 0
