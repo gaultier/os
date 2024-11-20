@@ -8,11 +8,4 @@ static void print_s(uint8_t *s, uint64_t len) {
   }
 }
 
-void kmain() {
-  print_s((uint8_t *)"hello me", 8);
-
-  // Prevent return.
-  __asm__(".loop:\n"
-          "hlt\n"
-          "jmp .loop\n");
-}
+void kmain() { print_s((uint8_t *)"hello me", 8); }
