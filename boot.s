@@ -58,11 +58,11 @@ start:
 	mov bx, 7e00h ; 512bytes from origin address 7c00h
 	int 13h
 
-	mov di, FREE_SPACE
 
 	xor ebx, ebx ; Clear bx.
 
 get_upper_mem:
+	mov di, FREE_SPACE
 	mov edx, 0x534D4150 ; Magic number: SMAP.
 	mov ecx, 24 ; sizeof(entry) (could be 20 if no ACPI3).
 	mov eax, 0xe820
@@ -90,6 +90,7 @@ get_upper_mem:
 	mov ebx, ebp ; Restore bx.
 	jmp get_upper_mem ; Loop.
 
+	xor ebp, ebp
 
 .end:
 	jmp switch_to_long_mode
