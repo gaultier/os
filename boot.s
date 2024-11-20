@@ -73,9 +73,6 @@ start:
     mov al, 0xFF                      ; Out 0xFF to 0xA1 and 0x21 to disable all IRQs.
     out 0xA1, al
     out 0x21, al
-    
-    nop
-    nop
 
     lidt [IDT]                        ; Load a zero length IDT so that any NMI causes a triple fault.
 
@@ -126,7 +123,7 @@ LongMode:
     mov fs, ax
     mov gs, ax
     mov ss, ax
-    mov rsp, 0x1000
+    mov rsp, 0x2000
 
     ; Blank out the screen to a blue color.
     mov edi, 0xB8000
