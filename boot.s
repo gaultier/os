@@ -28,6 +28,7 @@ start:
 	; Switch to long mode.
     ; Zero out the 16KiB buffer.
     ; Since we are doing a rep stosd, count should be bytes/4.   
+		mov edi, FREE_SPACE
     push di                           ; REP STOSD alters DI.
     mov ecx, 0x1000
     xor eax, eax
@@ -122,6 +123,7 @@ LongMode:
     mov es, ax
     mov fs, ax
     mov gs, ax
+  	mov rsp, 0x200000
 
     ; Blank out the screen to a blue color.
     mov edi, 0xB8000
