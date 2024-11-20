@@ -7,7 +7,7 @@ org 0x7C00	; Origin, tell the assembler that where the code will
 start:
   ; Copy kernel.bin right after the boot sector.
 	mov ah, 2h    ; int13h function 2
-	mov al, 16    ; we want to read N sectors (sector size = 512).
+	mov al, 9    ; we want to read N sectors (sector size = 512).
 	mov ch, 0     ; from cylinder number 0
 	mov cl, 2     ; the sector number 2 - second sector (starts from 1, not 0)
 	mov dh, 0     ; head number 0
@@ -122,7 +122,7 @@ LongMode:
     mov es, ax
     mov fs, ax
     mov gs, ax
-    mov rsp, 0x7c00+8096
+    mov rsp, 0x7c00+512+4096
 	  mov rbp, rsp
 
     ; Blank out the screen to a blue color.
@@ -131,15 +131,30 @@ LongMode:
     mov rax, 0x1F201F201F201F20       ; Set the value to set the screen to: Blue background, white foreground, blank spaces.
     rep stosq                         ; Clear the entire screen. 
  
-    jmp 0x7c00+512     ; jump to the kernel
+    call do64     ; jump to the kernel
+	.loop:
+		hlt
+	  jmp .loop
+
+do64:
+	push rbp
+	mov rbp, rsp
+	sub rsp, 16
+
+	mov BYTE [rsp+4], 5
+	mov BYTE [rbp-10], 6
+
+	pop rbp
+	add rsp, 16
+	ret
 
 bits 16
 ; Pad out file.
 times 510 - ($-$$) db 0
 dw 0xAA55
 
-kernel:
-incbin "kernel.bin"
+;kernel:
+;incbin "kernel.bin"
 ; Pad out file.
 stack: times 4096 db 0
-times 8192 - ($-$$) db 0
+; times 8192 - ($-$$) db 0
