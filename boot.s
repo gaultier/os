@@ -47,7 +47,7 @@ start:
 	; Detect upper memory.
 	mov sp, start
 
-  ; Copy kernel.exe right after the boot sector.
+  ; Copy kernel.bin right after the boot sector.
 	mov ah, 2h    ; int13h function 2
 	mov al, 2    ; we want to read 2 sectors (sector size = 512).
 	mov ch, 0     ; from cylinder number 0
@@ -182,4 +182,4 @@ times 510 - ($-$$) db 0
 dw 0xAA55
 
 kernel:
-incbin "kernel.exe"
+incbin "kernel.bin"
