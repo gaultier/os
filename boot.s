@@ -19,6 +19,7 @@ start:
 	xor ebx, ebx ; Clear bx.
 
 	; Detect upper memory.
+.get_upper_mem:
 	mov di, FREE_SPACE
 	mov edx, 0x534D4150 ; Magic number: SMAP.
 	mov ecx, 24 ; sizeof(entry) (could be 20 if no ACPI3).
@@ -30,7 +31,7 @@ start:
 
 	test ebx, ebx ; End of list?
 	je .end
-	jmp get_upper_mem ; Loop to read next entry.
+	jmp .get_upper_mem ; Loop to read next entry.
 
 	xor ebp, ebp
 
