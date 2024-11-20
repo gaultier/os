@@ -1,12 +1,15 @@
+ENTRY(kmain);
+
 SECTIONS
 {
+
 	.text : {
 		. = ALIGN(512);
-		*(.text)
+		*(.text) 
 	}
 
 	/* Read-only data. */
-	.rodata :
+	.rodata :  
 	{
 		. = ALIGN(512);
 		*(.rodata)
