@@ -35,12 +35,12 @@ start:
 
 	xor ebp, ebp
 
-.end:
-	jmp switch_to_long_mode
 
 .upper_mem_err:
 	hlt
 	jmp .upper_mem_err
+
+.end:
 
 ; Go to long mode.
 %define PAGE_PRESENT    (1 << 0)
@@ -48,25 +48,8 @@ start:
 %define CODE_SEG     0x0008
 %define DATA_SEG     0x0010
 
-ALIGN 4
-IDT:
-    .length       dw 0
-    .base         dd 0
 
-GDT:
-.null:
-    dq 0x0000000000000000             ; Null Descriptor - should be present.
-.code:
-    dq 0x00209A0000000000             ; 64-bit code descriptor (exec/read).
-    dq 0x0000920000000000             ; 64-bit data descriptor (read/write).
-align 4
-    dw 0                              ; Padding to make the "address of the GDT" field aligned on a 4-byte boundary.
-.pointer:
-    dw $ - GDT - 1                    ; 16-bit Size (Limit) of GDT.
-    dd GDT                            ; 32-bit Base Address of GDT. (CPU will zero extend to 64-bit)
-
-
-switch_to_long_mode:
+	; Switch to long mode.
     ; Zero out the 16KiB buffer.
     ; Since we are doing a rep stosd, count should be bytes/4.   
     push di                           ; REP STOSD alters DI.
@@ -140,6 +123,23 @@ switch_to_long_mode:
     lgdt [GDT.pointer]                ; Load GDT.Pointer defined below.
       
     jmp CODE_SEG:LongMode             ; Load CS with 64 bit segment and flush the instruction cache
+
+ALIGN 4
+IDT:
+    .length       dw 0
+    .base         dd 0
+
+GDT:
+.null:
+    dq 0x0000000000000000             ; Null Descriptor - should be present.
+.code:
+    dq 0x00209A0000000000             ; 64-bit code descriptor (exec/read).
+    dq 0x0000920000000000             ; 64-bit data descriptor (read/write).
+align 4
+    dw 0                              ; Padding to make the "address of the GDT" field aligned on a 4-byte boundary.
+.pointer:
+    dw $ - GDT - 1                    ; 16-bit Size (Limit) of GDT.
+    dd GDT                            ; 32-bit Base Address of GDT. (CPU will zero extend to 64-bit)
 
 
 [BITS 64]
