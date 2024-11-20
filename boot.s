@@ -19,28 +19,28 @@ start:
 	xor ebx, ebx ; Clear bx.
 
 	; Detect upper memory.
-.get_upper_mem:
-	mov di, FREE_SPACE
-	mov edx, 0x534D4150 ; Magic number: SMAP.
-	mov ecx, 24 ; sizeof(entry) (could be 20 if no ACPI3).
-	mov eax, 0xe820
-	int 0x15
-	jc .upper_mem_err
-	cmp eax, edx ; On success, eax must have been reset to "SMAP".
-	jne .upper_mem_err
-
-	test ebx, ebx ; End of list?
-	je .end
-	jmp .get_upper_mem ; Loop to read next entry.
-
-	xor ebp, ebp
-
-
-.upper_mem_err:
-	hlt
-	jmp .upper_mem_err
-
-.end:
+;.get_upper_mem:
+;	mov di, FREE_SPACE
+;	mov edx, 0x534D4150 ; Magic number: SMAP.
+;	mov ecx, 24 ; sizeof(entry) (could be 20 if no ACPI3).
+;	mov eax, 0xe820
+;	int 0x15
+;	jc .upper_mem_err
+;	cmp eax, edx ; On success, eax must have been reset to "SMAP".
+;	jne .upper_mem_err
+;
+;	test ebx, ebx ; End of list?
+;	je .end
+;	jmp .get_upper_mem ; Loop to read next entry.
+;
+;	xor ebp, ebp
+;
+;
+;.upper_mem_err:
+;	hlt
+;	jmp .upper_mem_err
+;
+;.end:
 
 ; Go to long mode.
 %define PAGE_PRESENT    (1 << 0)
