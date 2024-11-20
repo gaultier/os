@@ -5,9 +5,6 @@ org 0x7C00	; Origin, tell the assembler that where the code will
 %define FREE_SPACE 0x9000
 
 start:
-	; Detect upper memory.
-	mov sp, start
-
   ; Copy kernel.bin right after the boot sector.
 	mov ah, 2h    ; int13h function 2
 	mov al, 2    ; we want to read 2 sectors (sector size = 512).
@@ -21,7 +18,7 @@ start:
 
 	xor ebx, ebx ; Clear bx.
 
-get_upper_mem:
+	; Detect upper memory.
 	mov di, FREE_SPACE
 	mov edx, 0x534D4150 ; Magic number: SMAP.
 	mov ecx, 24 ; sizeof(entry) (could be 20 if no ACPI3).
