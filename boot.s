@@ -46,13 +46,7 @@
 start:
 	; Detect upper memory.
 	clc
-	mov ax, 0
 	mov sp, start
-	mov ss, ax
-	mov ds, ax
-	mov es, ax
-	mov fs, ax
-	mov gs, ax
 	cld ; TODO
 
   ; Copy kernel.exe right after the boot sector.

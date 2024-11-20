@@ -4,3 +4,13 @@
 - [ ] Setup stack properly before jumping to `kmain`
 - [ ] Read from kmain the memory mapping information (maybe?)
 
+
+## Debug
+
+```
+kill
+gdb-remote 1234
+br s -a 0x7e00+512
+continue
+``` 
+
