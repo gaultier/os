@@ -1,6 +1,6 @@
 AS=nasm
 
-boot.bin: boot.s long_mode_directly.s kernel.bin
+boot.bin: boot.s kernel.bin
 	$(AS) $< -f bin -o $@
 
 kernel.bin: kmain.c
