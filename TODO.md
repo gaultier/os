@@ -4,7 +4,8 @@
 - [ ] Setup idt
 - [x] Setup stack properly before jumping to `kmain`
 - [x] Make debugger work
-- [ ] Read from kmain the memory mapping information (maybe?)
+- [ ] Read from kmain the physical memory mapping information (maybe?)
+- [ ] Decide how to package user programs: List of ELF files statically known, simple file system, etc
 
 
 ## Debug
