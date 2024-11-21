@@ -7,7 +7,7 @@ org 0x7C00	; Origin, tell the assembler that where the code will
 start:
   ; Copy kernel.bin right after the boot sector.
 	mov ah, 2h    ; int13h function 2
-	mov al, 16    ; we want to read N sectors (sector size = 512).
+	mov al, 1    ; we want to read N sectors (sector size = 512).
 	mov ch, 0     ; from cylinder number 0
 	mov cl, 2     ; the sector number 2 - second sector (starts from 1, not 0)
 	mov dh, 0     ; head number 0
@@ -145,4 +145,3 @@ dw 0xAA55
 
 kernel:
 incbin "kernel.bin"
-times 8192 - ($-$$) db 0

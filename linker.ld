@@ -19,10 +19,15 @@ SECTIONS
 		*(.data)
 	}
 
-	/* Read-write data (uninitialized) and stack */
+	/* Read-write data (uninitialized) */
 	.bss :
 	{
-		*(COMMON)
 		*(.bss)
+	}
+
+	. = ALIGN(512);
+	.pad : {
+			. = . + (512 - (. % 512)) % 512;
+			BYTE(0)
 	}
 }
