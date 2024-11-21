@@ -123,7 +123,7 @@ LongMode:
     mov es, ax
     mov fs, ax
     mov gs, ax
-  	mov rsp, 0x200000
+  	lea rsp, 0x00002000
 
     ; Blank out the screen to a blue color.
     mov edi, 0xB8000

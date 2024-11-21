@@ -3,7 +3,7 @@ ENTRY(kmain);
 SECTIONS
 {
 
-	.text : {
+	.text 0x07e00 : {
 		*(.text) 
 	}
 
