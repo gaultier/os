@@ -9,10 +9,8 @@
 
 ## Debug
 
-```
-kill
-gdb-remote 1234
-br s -a 0x7e00+512
-continue
+```sh
+$ qemu-system-x86_64 -fda boot.bin -s -S
+$ gdb kernel.elf -ex 'target remote localhost:1234' -ex 'b kmain' -ex 'c'
 ``` 
 
