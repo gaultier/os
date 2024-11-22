@@ -8,6 +8,7 @@
 - [ ] Decide how to package user programs: List of ELF files statically known, simple file system, etc
 - [ ] Clock (for sleeping in userspace)
 - [ ] Round-robin scheduler
+- [.] Syscall hook
 
 
 ## Debug

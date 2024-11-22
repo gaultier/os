@@ -4,3 +4,4 @@ a.out
 *.o
 *.elf
 *.dwo
+tmp*

@@ -22,6 +22,7 @@ SECTIONS
 	/* Read-write data (uninitialized) */
 	.bss :
 	{
+	  *(COMMON);
 		*(.bss)
 	}
 
